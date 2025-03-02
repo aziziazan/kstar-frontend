@@ -2,14 +2,20 @@ import { useState,useEffect } from 'react'
 import React from 'react'
 import { useNavigate,Link } from 'react-router-dom';
 import axios from 'axios';
+import { useKeycloak } from '@react-keycloak/web';
 
 export const DrinkDeleteForm = ({drinkId}) => {
     const navigate = useNavigate();
     const [drinkName,setDrinkName] = useState('');
     const [error,setError] = useState('');
+    const { keycloak, initialized } = useKeycloak();
 
     useEffect(() => {
-        axios.get(`http://localhost:8085/api/drink/find/${drinkId}`).then((response) => {
+        axios.get(`http://localhost:8084/api/drink/find/${drinkId}`,{
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`
+            }
+          }).then((response) => {
             setDrinkName(response.data.drinkName);
         }).catch((error) => {
             setError(error.message);
@@ -19,12 +25,16 @@ export const DrinkDeleteForm = ({drinkId}) => {
     const handleSubmit = (e) =>{
         e.preventDefault();
         deleteDrink(drinkId);
+        navigate('/drinks', { replace: true });
     }
     
 
     const deleteDrink = (drinkId) => {
-        axios.delete(`http://localhost:8085/api/drink/delete/${drinkId}`);
-        navigate('/drinks');
+        axios.delete(`http://localhost:8084/api/drink/delete/${drinkId}`,{
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`
+            }
+          });
     };
 
     return (

@@ -5,6 +5,8 @@ import { DrinkTable } from '../../components/drinks/DrinkTable'
 import { Footer } from '../../components/Footer'
 import { Navigation } from '../../components/Navigation';
 import { SearchBar } from '../../components/SearchBar'
+import PrivateRoute from '../../PrivateRoute'
+import { ShortBanner } from '../../components/ShortBanner'
 
 
 export const Drinks = () => {
@@ -16,12 +18,15 @@ export const Drinks = () => {
 
   return (
     <>
+    <PrivateRoute>
     <Header/>
     <SearchBar onUpdateSearch={handleSearch}/>
     <Navigation/>
-    <Hero/>
+    <ShortBanner/>
     <DrinkTable drinkName={drinkName}/>
     <Footer/>
+    </PrivateRoute>
+ 
     </>
   )
 }

@@ -1,33 +1,43 @@
 import React, { useState } from 'react'
 import './DrinkForm.css'
 import axios from "axios";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, replace, useNavigate } from 'react-router-dom';
+import { useKeycloak } from '@react-keycloak/web';
 
 
 
 export const DrinkAddForm = () => {
     const [drinkName,setDrinkName] = useState('');
     const [drinkPrice,setDrinkPrice] = useState('');
+    const [drinkBuyingPrice,setDrinkBuyingPrice] = useState('');
     const [drinks,setDrinks] = useState([]);
     const [error,setError] = useState('');
     const navigate = useNavigate();
+    const { keycloak, initialized } = useKeycloak();
 
 
     const handleSubmit = (e) =>{
         e.preventDefault();
-        addDrink(drinkName,drinkPrice);
+        addDrink(drinkName,drinkPrice,drinkBuyingPrice);
     }
 
 
-    const addDrink = (drinkName,drinkPrice) =>{
-        axios.post('http://localhost:8085/api/drink/create/',{
+    const addDrink = (drinkName,drinkPrice,drinkBuyingPrice) =>{
+        axios.post('http://localhost:8084/api/drink/create/',{
             drinkName: drinkName,
             drinkPrice: drinkPrice,
-        }).then((response) => {
+            drinkBuyingPrice: drinkBuyingPrice,
+        },{
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`
+            }
+          }
+        ).then((response) => {
             setDrinks([response.data,...drinks]);
             setDrinkName('');
             setDrinkPrice('');
-            navigate('/drinks');
+            setDrinkBuyingPrice('');
+            navigate('/drinks', { replace: true });
         })
         .catch((err) => {
             setError(err.message);
@@ -57,7 +67,11 @@ export const DrinkAddForm = () => {
                     </div>
                     <div className="in-input">
                         <i className="fa-solid fa-lock"></i>
-                        <input type="number" value={drinkPrice} placeholder="BEI" onChange={(e) => setDrinkPrice(e.target.value)}/>
+                        <input type="number" value={drinkPrice} placeholder="BEI YA KUUZA" onChange={(e) => setDrinkPrice(e.target.value)}/>
+                    </div>
+                    <div className="in-input">
+                        <i className="fa-solid fa-lock"></i>
+                        <input type="number" value={drinkBuyingPrice} placeholder="BEI YA KUNUNUA" onChange={(e) => setDrinkBuyingPrice(e.target.value)}/>
                     </div>
                     <div className="in-input-text">
                         <button type="submit">ONGEZA</button>

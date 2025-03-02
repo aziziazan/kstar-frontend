@@ -4,6 +4,8 @@ import { Hero } from '../../components/Hero'
 import { Footer } from '../../components/Footer'
 import { ImportDrinkUpdateForm } from '../../components/import/ImportDrinkUpdateForm'
 import { useParams } from 'react-router-dom'
+import PrivateRoute from '../../PrivateRoute'
+import { Navigation } from '../../components/Navigation'
 
 export const UpdateImportDrink = () => {
   const params = useParams();
@@ -11,10 +13,13 @@ export const UpdateImportDrink = () => {
 
   return (
     <>
-       <Header/>
-       <Hero/>
-       <ImportDrinkUpdateForm importDrinkId={importDrinkId}/>
-       <Footer/>
+    <PrivateRoute>
+    <Header/>
+    <Navigation/>
+    <Hero/>
+    <ImportDrinkUpdateForm importDrinkId={importDrinkId}/>
+    <Footer/>
+    </PrivateRoute>
     </>
   )
 }

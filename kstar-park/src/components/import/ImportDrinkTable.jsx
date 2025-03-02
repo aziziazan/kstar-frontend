@@ -2,21 +2,37 @@ import React, { useEffect, useState } from 'react';
 import './ImportDrinkTable.css';
 import { useNavigate ,Link} from 'react-router-dom';
 import axios from 'axios';
+import { useKeycloak } from '@react-keycloak/web';
 
-export const ImportDrinkTable = () => {
+export const ImportDrinkTable = ({searchDate}) => {
     const [importDrinks,setImportDrinks] = useState([]);
     const navigate = useNavigate();
     let content = <p>Inatafuta........</p>;
+    const { keycloak, initialized } = useKeycloak();
 
 
 
 
     useEffect(() => {
-        axios.get(`http://localhost:8086/api/import-drink/list-import-drink/`).then((response) => {
+      if(searchDate == ''){
+        axios.get(`http://localhost:8084/api/import-drink/list-import-drink/`,{
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        }).then((response) => {
            setImportDrinks(response.data);
-           
         });
-    },[]);
+      }else{
+        axios.get(`http://localhost:8084/api/import-drink/list-import-drink/${searchDate}`,{
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        }).then((response) => {
+           setImportDrinks(response.data);
+        });
+      }
+ 
+    },[searchDate]);
 
     const updateImportDrink = (importDrinkId) => {
       navigate(`/import/update-import-drink/${importDrinkId}`);
@@ -32,11 +48,10 @@ export const ImportDrinkTable = () => {
             <thead>
               <tr>
                 <th>JINA LA KINYWAJI</th>
-                <th>TAREHE YA KUINGIZA</th>
                 <th>IDADI</th>
                 <th>JUMLA YA GHARAMA</th>
-                <th>GHARAMA YA KILA KINYWAJI</th>
-                <th colSpan="2">MATENDO</th>
+                <th>GHARAMA KWA KILA MOJA</th>
+                { (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <th colSpan="2">MATENDO</th>}
               </tr>
             </thead>
             <tbody>
@@ -44,13 +59,12 @@ export const ImportDrinkTable = () => {
               {importDrinks.map((importDrink) => {
                 return(
                   <tr key={importDrink.id}>
-                  <td>{importDrink.drinkName}</td>
-                  <td>{importDrink.date}</td>
+                  <td>{importDrink.drinkName.toUpperCase()}</td>
                   <td>{importDrink.noOfDrinksAdded}</td>
-                  <td>{importDrink.totalCost}</td>
-                  <td>{importDrink.costOfEachDrink}</td>
-                  <td><button onClick={() => deleteImportDrink(importDrink.id)}>FUTA</button></td>
-                  <td><button onClick={() => updateImportDrink(importDrink.id)}>HUISHA</button></td>
+                  <td>{importDrink.totalCost.toLocaleString('en')}</td>
+                  <td>{importDrink.costOfEachDrink.toLocaleString('en')}</td>
+                  <td>{ (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <button onClick={() => deleteImportDrink(importDrink.id)}>FUTA</button>}</td>
+                  <td>{ (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <button onClick={() => updateImportDrink(importDrink.id)}>HUISHA</button>}</td>
                   </tr>
                 );
               })}
@@ -59,7 +73,7 @@ export const ImportDrinkTable = () => {
           </table>
       )
     }else{
-      content = <div className='NoDrinkBox'><h4>Hakuna Kinywaji chochote, bonyeza <Link to="/import/add-drink">HAPA</Link> kuongeza</h4></div>;
+      content = <div className='NoDrinkBox'><h4>Hakuna Kinywaji chochote, bonyeza <Link to="/import/add-drink">HAPA</Link> kuingiza</h4></div>;
     }
 
 
@@ -68,13 +82,13 @@ export const ImportDrinkTable = () => {
     <div className='container'>
     <div className="table-header">
         <div className='other'>
-
+          <p>{searchDate}</p>
         </div>
         <div className='title'>
-            <h3>ORODHA YA VINYWAJI VILIVYOINGIZWA</h3>
+            <h3>ORODHA YA VINYWAJI VILIVYOINGIA</h3>
         </div>
         <div className='action'>
-            <Link to="/import/add-drink">ONGEZA KINYWAJI</Link>
+            { (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <Link to="/import/add-drink">INGIZA KINYWAJI</Link>}
         </div>
     </div>
     <section>

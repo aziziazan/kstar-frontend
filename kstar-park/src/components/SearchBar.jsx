@@ -6,7 +6,7 @@ export const SearchBar = (props) => {
     <>
     <div className="heading">
         <div  className="search-bar">
-              <input type="search" placeholder='Tafuta kinywaji..' id="" onChange={props.onUpdateSearch}/>
+              <input type="search" placeholder='Bofya hapa kutafuta' id="" onChange={props.onUpdateSearch}/>
         </div>
     </div>
     </>

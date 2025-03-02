@@ -1,18 +1,24 @@
 import React from 'react'
 import './Header.css';
+import { useKeycloak } from '@react-keycloak/web'
 
 
 export const Header = () => {
+  const { keycloak, initialized } = useKeycloak();
   return (
     <>
     <header>
         <div className="logo">
-            
+            <img src="src/assets/images/logo.png" alt="" className='logo-image'/>
+        </div>
+        <div className='title-top'>
+          <p>K-STAR PARK DAILY STOCKSHEET REPORT SYSTEM</p>
         </div>
         <div className="profile-account">
-            <p><span><i className="fa-solid fa-circle-user"></i></span>aziziazan.net@gmail.com</p>
+          {
+            keycloak.authenticated ? <p>({keycloak.tokenParsed.preferred_username})</p> : null
+          } 
         </div>
-
     </header>
     </>
   );

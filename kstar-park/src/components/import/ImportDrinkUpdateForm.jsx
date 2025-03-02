@@ -2,6 +2,7 @@ import React from 'react'
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import { useState,useEffect } from 'react';
+import { useKeycloak } from '@react-keycloak/web';
 
 export const ImportDrinkUpdateForm = ({importDrinkId}) => {
 
@@ -15,28 +16,34 @@ export const ImportDrinkUpdateForm = ({importDrinkId}) => {
   
   const [error,setError] = useState('');
   const navigate = useNavigate();
+  const { keycloak, initialized } = useKeycloak();
 
 
   useEffect(() => {
 
-    axios.get(`http://localhost:8086/api/import-drink/find-import-drink/${importDrinkId}`).then((response) => {
+    axios.get(`http://localhost:8084/api/import-drink/find-import-drink/${importDrinkId}`,{
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      }).then((response) => {
        setNoOfDrinksAdded(response.data.noOfDrinksAdded);
        setTotalCost(response.data.totalCost);
        setManagerId(response.data.managerId);
        setDrinkId(response.data.drinkId);
        
-       axios.get(`http://localhost:8085/api/drink/list/`).then((response) => {
+       axios.get(`http://localhost:8084/api/drink/list/`,{
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+       }).then((response) => {
         setDrinks(response.data);
-
       }).catch((error) => {
         setError(error.message);
-       });
+      });
 
     }).catch((error) => {
         setError(error.message);
     });
-
-
   },[importDrinkId]);
 
   const handleSubmit = (e) =>{
@@ -46,15 +53,19 @@ export const ImportDrinkUpdateForm = ({importDrinkId}) => {
   }
 
   const updateImportDrink = (importDrinkId,noOfDrinksAdded,totalCost,managerId,drinkId) =>{
-    axios.put('http://localhost:8086/api/import-drink/update-import-drink/',{
+    axios.put('http://localhost:8084/api/import-drink/update-import-drink/',{
         id: importDrinkId,
         noOfDrinksAdded: noOfDrinksAdded, 
         totalCost: totalCost,
         managerId: managerId,
         drinkId: drinkId,
-    }).then((response) => {
+    },{
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      }).then((response) => {
         setImportDrinks([response.data,...importDrinks]);
-        navigate('/import');
+        navigate('/import', { replace: true });
     })
     .catch((err) => {
         setError(err.message);

@@ -1,11 +1,25 @@
 /* banner */
 .banner{
     width: 100%;
-    height: 60vh;
+    height: 72vh;
     color: #f0f0f0;
     background-image: linear-gradient(#000000,red);
     display: flex;
     flex-direction: column;
     font-family: Courier, monospace;
+
+}
+
+.banner-display{
+    position: sticky;
+    top: -17vh;
+    width: 100%;
+    height: 50vh;
+    color: #f0f0f0;
+    background-image: linear-gradient(#000000,red);
+    display: flex;
+    flex-direction: column;
+    font-family: Courier, monospace;
+    z-index: 0;
 
 }

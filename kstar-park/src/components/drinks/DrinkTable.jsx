@@ -2,6 +2,7 @@ import React, { useState,useEffect } from 'react'
 import './DrinkTable.css'
 import axios from "axios";
 import {Link, useNavigate} from 'react-router-dom'
+import { useKeycloak } from '@react-keycloak/web';
 
 
 
@@ -9,15 +10,26 @@ export const DrinkTable = ({drinkName}) => {
    const [drinks, setDrinks] = useState([]);
    const navigate = useNavigate();
    let content = <p>Inatafuta........</p>;
+   const { keycloak, initialized } = useKeycloak();
+   
+
+
 
   useEffect(() => {
-    
     if(drinkName == ''){
-      axios.get(`http://localhost:8085/api/drink/list/`).then((response) => {
+      axios.get(`http://localhost:8084/api/drink/list/`,{
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      }).then((response) => {
         setDrinks(response.data);
       });
     }else{
-      axios.get(`http://localhost:8085/api/drink/list/${drinkName}`).then((response) => {
+      axios.get(`http://localhost:8084/api/drink/list/${drinkName}`,{
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      }).then((response) => {
         setDrinks(response.data);
       });
     }
@@ -42,11 +54,11 @@ export const DrinkTable = ({drinkName}) => {
       <thead>
         <tr>
           <th>JINA LA KINYWAJI</th>
-          <th>BEI YAKE</th>
-          <th>JUMLA YA VILIVYOINGIA</th>
-          <th>JUMLA YA VILIVYOUZWA</th>
-          <th>VILIVYOPO SASA</th>
-          <th colSpan="2">MATENDO</th>
+          <th>VINYWAJI VILIVYOPO</th>
+          <th>BEI YA KUUZA</th>
+          <th>OFFER</th>
+          { (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <th>BEI YA KUNUNUA</th>}
+          { (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <th colSpan="2">MATENDO</th>}
         </tr>
       </thead>
       <tbody>
@@ -54,13 +66,13 @@ export const DrinkTable = ({drinkName}) => {
         {drinks.map((drink) => {
           return(
             <tr key={drink.id}>
-            <td>{drink.drinkName}</td>
-            <td>{drink.drinkPrice}</td>
-            <td>{drink.totalImportedDrinks}</td>
-            <td>{drink.totalSoldDrinks}</td>
+            <td>{drink.drinkName.toUpperCase()}</td>
             <td>{drink.drinkAvailable}</td>
-            <td><button onClick={() => deleteDrink(drink.id)}>FUTA</button></td>
-            <td><button onClick={() => updateDrink(drink.id)}>HUISHA</button></td>
+            <td>{drink.drinkPrice.toLocaleString('en')}</td>
+             <td>{(drink.hasPromotion == 1) && 'Offer'}</td>
+            <td>{ (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && drink.drinkBuyingPrice}</td>
+            <td>{ (keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <button onClick={() => deleteDrink(drink.id)}>FUTA</button>}</td>
+            <td>{(keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) &&<button onClick={() => updateDrink(drink.id)}>HUISHA</button>}</td>
             </tr>
           );
         })}
@@ -83,7 +95,7 @@ export const DrinkTable = ({drinkName}) => {
             <h3>ORODHA YA VINYWAJI</h3>
         </div>
         <div className='action'>
-            <Link to="/drinks/add-drink">ONGEZA KINYWAJI</Link>
+            {(keycloak.hasResourceRole('manager') ||  keycloak.hasResourceRole('admin')) && <Link to="/drinks/add-drink">ONGEZA KINYWAJI</Link>}
         </div>
     </div>
     <section>

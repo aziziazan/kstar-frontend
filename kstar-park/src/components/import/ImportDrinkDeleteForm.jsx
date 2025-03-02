@@ -1,23 +1,23 @@
 import React from 'react'
 import { useEffect,useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, replace } from 'react-router-dom';
 import axios from 'axios';
+import { useKeycloak } from '@react-keycloak/web';
 
 export const ImportDrinkDeleteForm = ({importDrinkId}) => {
     const [importDrinks,setImportDrinks] = useState([]);
-    const [drinkName,setDrinkName] = useState([]);
     const [error,setError] = useState('');
     const navigate = useNavigate();
+    const { keycloak, initialized } = useKeycloak();
 
     useEffect(() => {
 
-        axios.get(`http://localhost:8086/api/import-drink/find-import-drink/${importDrinkId}`).then((response) => {
+        axios.get(`http://localhost:8084/api/import-drink/find-import-drink/${importDrinkId}`,{
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`
+            }
+          }).then((response) => {
            setImportDrinks(response.data);
-           axios.get(`http://localhost:8085/api/drink/find/${response.data.drinkId}`).then((response) => {
-            setDrinkName(response.data.drinkName);
-           }).catch((error) => {
-            setError(error.message);
-           });
         }).catch((error) => {
             setError(error.message);
         });
@@ -33,11 +33,16 @@ export const ImportDrinkDeleteForm = ({importDrinkId}) => {
 
 
     const deleteImportDrink = (importDrinkId) => {
-        axios.delete(`http://localhost:8086/api/import-drink/delete-import-drink/${importDrinkId}`)
+        axios.delete(`http://localhost:8084/api/import-drink/delete-import-drink/${importDrinkId}`,{
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`
+            }
+          }
+        )
         .catch((error) => {
             setError(error.message);
         });
-        navigate('/import');
+        navigate('/import', { replace: true });
     };
 
   return (
@@ -58,7 +63,7 @@ export const ImportDrinkDeleteForm = ({importDrinkId}) => {
 
                     <div className="in-input">
                         <i className="fa-solid fa-envelope"></i>
-                        <input type="text"  placeholder="IDADI" value={"Unafuta "+drinkName+" "+importDrinks.noOfDrinksAdded+"?"}/>
+                        <input type="text"  placeholder="IDADI" value={"Unafuta "+importDrinks.drinkName+" "+importDrinks.noOfDrinksAdded+"?"}/>
                     </div>
 
                     <div className="in-input-text">
